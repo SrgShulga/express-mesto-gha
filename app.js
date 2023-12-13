@@ -23,6 +23,10 @@ app.use((req, res, next) => {
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемая страница не найдена' });
+});
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Адрес сервера — http://${BASE_PATH}:${PORT}`);
