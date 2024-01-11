@@ -7,25 +7,27 @@ const app = express();
 
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
+const authGuard = require('./middlewares/auth');
+const NotFound = require('./utils/error-response/NotFound');
+const errorHandler = require('./middlewares/error-handler');
 
 const mongoDB = 'mongodb://localhost:27017/mestodb';
 mongoose.connect(mongoDB);
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6578c59fe2402f097e224eec',
-  };
+app.post('/signin', login);
+app.post('/signup', createUser);
 
-  next();
-});
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
+app.use('/users', authGuard, userRouter);
+app.use('/cards', authGuard, cardRouter);
 
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемая страница не найдена' });
+app.use('*', (req, res, next) => {
+  next(new NotFound('Запрашиваемая страница не найдена'));
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
