@@ -4,10 +4,14 @@ const { errors } = require('celebrate');
 
 const { PORT = 3000, BASE_PATH = 'localhost' } = process.env;
 
-const mainRouter = require('./routes/index');
-
 const app = express();
 
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
+const { validateUserLogin, validateUserRegister } = require('./utils/validation');
+const authGuard = require('./middlewares/auth');
+const NotFound = require('./utils/error-response/NotFound');
 const errorHandler = require('./middlewares/error-handler');
 
 const mongoDB = 'mongodb://localhost:27017/mestodb';
@@ -15,10 +19,18 @@ mongoose.connect(mongoDB);
 
 app.use(express.json());
 
-app.use(mainRouter);
+app.post('/signin', validateUserLogin, login);
+app.post('/signup', validateUserRegister, createUser);
+
+app.use('/users', authGuard, userRouter);
+app.use('/cards', authGuard, cardRouter);
+
+app.use('*', (req, res, next) => {
+  next(new NotFound('Запрашиваемая страница не найдена'));
+});
 
 app.use(errorHandler);
-app.use(errors());
+app.use(errors);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

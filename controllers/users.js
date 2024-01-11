@@ -17,7 +17,7 @@ const RequestConflict = require('../utils/error-response/RequestConflict');
 const getUserList = (req, res, next) => {
   User.find({})
     .then((userList) => res.send({ data: userList }))
-    .catch(next);
+    .catch((error) => next(error));
 };
 
 const getUserId = (req, res, next) => {
@@ -41,7 +41,7 @@ const getUserProfile = (req, res, next) => {
         next(new NotFound('Пользователь по указанному _id не найден'));
       } else { res.send({ data: selectedUser }); }
     })
-    .catch((error) => { next(error); });
+    .catch((error) => next(error));
 };
 
 const createUser = (req, res, next) => {
