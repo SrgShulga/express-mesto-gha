@@ -8,6 +8,7 @@ const app = express();
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
+const { validateUserLogin, validateUserRegister } = require('./utils/validation');
 const authGuard = require('./middlewares/auth');
 const NotFound = require('./utils/error-response/NotFound');
 const errorHandler = require('./middlewares/error-handler');
@@ -17,8 +18,8 @@ mongoose.connect(mongoDB);
 
 app.use(express.json());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', validateUserLogin, login);
+app.post('/signup', validateUserRegister, createUser);
 
 app.use('/users', authGuard, userRouter);
 app.use('/cards', authGuard, cardRouter);
