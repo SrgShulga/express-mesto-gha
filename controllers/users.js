@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -7,17 +8,19 @@ const {
   SUCCESS_CREATED,
 } = require('../utils/response-status');
 
+const { ValidationError, CastError } = mongoose.Error;
+
 const NotFound = require('../utils/error-response/NotFound');
 const BadRequest = require('../utils/error-response/BadRequest');
 const RequestConflict = require('../utils/error-response/RequestConflict');
 
-module.exports.getUserList = (req, res, next) => {
+const getUserList = (req, res, next) => {
   User.find({})
     .then((userList) => res.send({ data: userList }))
     .catch((error) => next(error));
 };
 
-module.exports.getUserId = (req, res, next) => {
+const getUserId = (req, res, next) => {
   User.findById(req.params.userId)
     .then((selectedUser) => {
       if (selectedUser) {
@@ -25,13 +28,13 @@ module.exports.getUserId = (req, res, next) => {
       } else { next(new NotFound('Пользователь по указанному _id не найден')); }
     })
     .catch((error) => {
-      if (error.name === 'CastError') {
+      if (error instanceof CastError) {
         next(new BadRequest('Некорректный _id запрашиваемого пользователя'));
       } else { next(error); }
     });
 };
 
-module.exports.getUserProfile = (req, res, next) => {
+const getUserProfile = (req, res, next) => {
   User.findById(req.user._id)
     .then((selectedUser) => {
       if (!selectedUser) {
@@ -41,7 +44,7 @@ module.exports.getUserProfile = (req, res, next) => {
     .catch((error) => { next(error); });
 };
 
-module.exports.createUser = (req, res, next) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -53,7 +56,7 @@ module.exports.createUser = (req, res, next) => {
       name, about, avatar, email,
     }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error instanceof ValidationError) {
         next(new BadRequest('Переданы некорректные данные при создании пользователя'));
       } else if (error.code === DUPLICATE_OBJECT) {
         next(new RequestConflict('Пользователь с указанной почтой уже есть в системе'));
@@ -61,7 +64,7 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-module.exports.updateUserData = (req, res, next) => {
+const updateUserData = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
@@ -69,13 +72,13 @@ module.exports.updateUserData = (req, res, next) => {
   })
     .then((updatedData) => res.send({ data: updatedData }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error instanceof ValidationError) {
         next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
       } else { next(error); }
     });
 };
 
-module.exports.login = (req, res, next) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((selectedUser) => {
@@ -85,7 +88,7 @@ module.exports.login = (req, res, next) => {
     .catch((error) => next(error));
 };
 
-module.exports.updateUserAvatar = (req, res, next) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true,
@@ -93,8 +96,18 @@ module.exports.updateUserAvatar = (req, res, next) => {
   })
     .then((updatedAvatar) => res.send({ data: updatedAvatar }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error instanceof ValidationError) {
         next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
       } else { next(error); }
     });
+};
+
+module.exports = {
+  getUserList,
+  getUserId,
+  createUser,
+  updateUserData,
+  updateUserAvatar,
+  login,
+  getUserProfile,
 };
