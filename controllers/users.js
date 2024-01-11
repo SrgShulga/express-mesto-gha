@@ -5,7 +5,7 @@ const User = require('../models/user');
 const {
   DUPLICATE_OBJECT,
   SUCCESS_CREATED,
-} = require('../utils/error-status');
+} = require('../utils/response-status');
 
 const NotFound = require('../utils/error-response/NotFound');
 const BadRequest = require('../utils/error-response/BadRequest');

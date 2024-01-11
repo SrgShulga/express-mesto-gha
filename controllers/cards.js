@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 
-const { SUCCESS_CREATED } = require('../utils/error-status');
+const { SUCCESS_CREATED } = require('../utils/response-status');
 
 const NotFound = require('../utils/error-response/NotFound');
 const BadRequest = require('../utils/error-response/BadRequest');
