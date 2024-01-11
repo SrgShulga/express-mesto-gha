@@ -30,9 +30,9 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((selectedCard) => {
-      if (!selectedCard) { next(new NotFound('Карточка по указанному _id не найдена')); }
-      if (!selectedCard.owner.equals(req.user._id)) { next(new Forbidden('Вы не являетесь автором карточки, удаление невозможно')); }
-      Card.findByIdAndDelete(req.params.cardId)
+      if (!selectedCard) { return next(new NotFound('Карточка по указанному _id не найдена')); }
+      if (!selectedCard.owner.equals(req.user._id)) { return next(new Forbidden('Вы не являетесь автором карточки, удаление невозможно')); }
+      return Card.findByIdAndDelete(req.params.cardId)
         .onFail(() => new NotFound('Карточка по указанному _id не найдена'))
         .then(() => { res.send({ message: 'Карточка успешно удалена с сервера' }); });
     })

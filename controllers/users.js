@@ -17,7 +17,7 @@ const RequestConflict = require('../utils/error-response/RequestConflict');
 const getUserList = (req, res, next) => {
   User.find({})
     .then((userList) => res.send({ data: userList }))
-    .catch((error) => next(error));
+    .catch(next);
 };
 
 const getUserId = (req, res, next) => {
