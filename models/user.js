@@ -47,11 +47,11 @@ const userSchema = new mongoose.Schema({
 // eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) { return Promise.reject(new Unauthorized('Имя пользователя или (-и) пароль введены неверно')); }
-      return bcrypt.compare(password, user.password).then((correct) => {
+    .then((selectedUser) => {
+      if (!selectedUser) { return Promise.reject(new Unauthorized('Имя пользователя или (-и) пароль введены неверно')); }
+      return bcrypt.compare(password, selectedUser.password).then((correct) => {
         if (!correct) { return Promise.reject(new Unauthorized('Имя пользователя или (-и) пароль введены неверно')); }
-        return user;
+        return selectedUser;
       });
     });
 };
